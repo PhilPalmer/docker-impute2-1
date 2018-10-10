@@ -1,5 +1,5 @@
 params.rawdata               = "${baseDir}/data/id_600_raw_data.zip"
-params.chromosome            = (1..22) + 'X'
+params.chromosome            = (21..22) + 'X'
 params.uniqueID              = "placeholder"
 params.email                 = "alaincoletta@insilicodb.com"
 params.protect_from_deletion = "TRUE"
