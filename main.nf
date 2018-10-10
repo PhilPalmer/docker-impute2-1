@@ -25,7 +25,6 @@ rawFileChannel = Channel.fromPath(params.rawdata)
 
 process fetch_reference {
   echo true
-  container null
 
   input:
   val referenceUrl from params.referenceUrl
