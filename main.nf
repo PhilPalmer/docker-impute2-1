@@ -214,9 +214,9 @@ lala1 = Channel.create()
 (lala1, duplicatesRefOutChan) = referenceDir1.combine(duplicatesOutChan).into(2)
 
 lala1.println()
-//referenceDir1.combine(duplicatesOutChan).set { duplicatesRefOutChan }
+//referenceDir1.combine(duplicatesOutChan).set { duplicatesRefOutChan } 
 
-//duplicatesOutChan.map{ chromosome, step_files -> [ chromosome, file(params.referenceDir), step_files ] }.set { duplicatesRefOutChan }
+//duplicatesOutChan.map{ chromosome, step_files -> [ chromosome, file(params.referenceDir), step_files ] }.set { duplicatesRefOutChan } 
 
 process checkStrandFlips {
 
@@ -263,7 +263,7 @@ process checkStrandFlips {
 
 chromosomeMaxLengthOut.flatMap(this.&foo).set { flattendChan }
 
-referenceDir2.combine(flattendChan).set { flattendRefChan }
+referenceDir2.combine(flattendChan).set { flattendRefChan } 
 
 //flattendChan.map{ chr, start, i, haps, sampleFile -> [ chr, file(params.referenceDir), start, i, haps, sampleFile ] }.set { flattendRefChan }
 
@@ -383,7 +383,7 @@ process zipping {
   file rawdata from convertChan2
 
   output:
-  set file("${uniqueID}.gen.zip"), file("${uniqueID}.23andme.zip"), file("${uniqueID}.input_data.zip") into zippingOutChan, ancestry
+  set file("${uniqueID}.gen.zip"), file("${uniqueID}.23andme.zip"), file("${uniqueID}.input_data.zip") into zippingOutChan
 
   script:
   zipFile23andme = "${uniqueID}.23andme.zip"
@@ -422,23 +422,6 @@ process createPDataFile {
   """
 }
 
-process ancestry {
-
-  publishDir params.resultdir, mode: 'copy'
-  container 'theearthwaswithoutformandvoid/y8j9q1j60h3fg4xeuvzd:pgpancestry'
-
-  input:
-  set file(gen), file(imputed), file(input) from ancestry
-
-  output:
-  file("*") into results
-
-  """
-  unzip imputed
-  python /controller.py --file *.txt --runs 1
-  """
-}
-
 createPDataFileOutChan.subscribe{it -> println it}
 
 workflow.onComplete {
@@ -474,3 +457,5 @@ def range(min, max, step) {
   }
   return result
 }
+
+
