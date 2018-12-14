@@ -1,7 +1,7 @@
 params.rawdata               = "${baseDir}/data/id_600_raw_data.zip"
 params.chromosome            = (1..22) + 'X'
 params.uniqueID              = "placeholder"
-params.email                 = "alaincoletta@insilicodb.com"
+params.email                 = "dev@lifebit.ai"
 params.protect_from_deletion = "TRUE"
 params.filename              = "placeholder.txt"
 params.webhook               = false
@@ -15,16 +15,11 @@ if ( ! params.chromosome instanceof List) {
   params.chromosome = params.chromosome.tokenize(',')
 }
 
-if (uniqueID == "placeholder") {
-  uniqueID = (params.rawdata =~ /([^\/]*)_raw_data.[a-z]+$/)[ 0 ][ 1 ]
-}
-println uniqueID
-println params.rawdata
+uniqueID = file(params.rawdata).baseName
 
 rawFileChannel = Channel.fromPath(params.rawdata)
 
 process fetch_reference {
-  echo true
 
   input:
   val referenceUrl from params.referenceUrl
@@ -52,7 +47,6 @@ referenceDir2 = Channel.create()
 (referenceDir1, referenceDir2) = referenceDir.into(2)
 
 process unzip {
-  echo true
 
   input:
   file inputFile from rawFileChannel
@@ -91,7 +85,6 @@ process unzip {
 }
 
 process convert {
-  echo true
 
   input:
   file inputFile from unzipOutChan
@@ -140,7 +133,6 @@ process convert {
 
 process plink {
 
-  echo true
   maxForks 6
 
   input:
@@ -161,7 +153,6 @@ process plink {
 
 process createFileValidationOutput {
 
-  echo true
   publishDir params.publishDir, mode: 'copy'
 
   when:
@@ -189,8 +180,6 @@ process createFileValidationOutput {
 
 process extractChromosome {
 
-  echo true
-
   when:
   !params.isFileValidation
 
@@ -214,15 +203,14 @@ lala1 = Channel.create()
 (lala1, duplicatesRefOutChan) = referenceDir1.combine(duplicatesOutChan).into(2)
 
 lala1.println()
-//referenceDir1.combine(duplicatesOutChan).set { duplicatesRefOutChan } 
+//referenceDir1.combine(duplicatesOutChan).set { duplicatesRefOutChan }
 
-//duplicatesOutChan.map{ chromosome, step_files -> [ chromosome, file(params.referenceDir), step_files ] }.set { duplicatesRefOutChan } 
+//duplicatesOutChan.map{ chromosome, step_files -> [ chromosome, file(params.referenceDir), step_files ] }.set { duplicatesRefOutChan }
 
 process checkStrandFlips {
 
   validExitStatus 0,1,2
   errorStrategy 'ignore'
-  echo true
 
   input:
   set file('reference'), val(chr), file("*") from duplicatesRefOutChan
@@ -263,13 +251,12 @@ process checkStrandFlips {
 
 chromosomeMaxLengthOut.flatMap(this.&foo).set { flattendChan }
 
-referenceDir2.combine(flattendChan).set { flattendRefChan } 
+referenceDir2.combine(flattendChan).set { flattendRefChan }
 
 //flattendChan.map{ chr, start, i, haps, sampleFile -> [ chr, file(params.referenceDir), start, i, haps, sampleFile ] }.set { flattendRefChan }
 
 process impute2 {
 
-  echo true
   validExitStatus 0,1,2
   errorStrategy 'ignore'
   maxForks 4
@@ -312,8 +299,6 @@ impute2GroupedChan = impute2Chan
   */
 
 process summarize {
-
-  echo true
 
   input:
   set val(chr), file(genFiles), file(sampleFile) from impute2GroupedChan
@@ -373,8 +358,6 @@ summarizeConcatChan = summarizeChan.reduce { a, b -> a + b }
 
 process zipping {
 
-  echo true
-
   when:
   !params.isFileValidation
 
@@ -407,8 +390,6 @@ process zipping {
 process createPDataFile {
 
   publishDir params.resultdir, mode: 'copy'
-
-  echo true
 
   input:
   set file("${uniqueID}.gen.zip"), file("${uniqueID}.23andme.zip"), file("${uniqueID}.input_data.zip") from zippingOutChan
@@ -457,5 +438,3 @@ def range(min, max, step) {
   }
   return result
 }
-
-
