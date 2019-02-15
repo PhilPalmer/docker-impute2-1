@@ -133,8 +133,6 @@ process convert {
 
 process plink {
 
-  maxForks 6
-
   input:
   file rawdata from convertChan
 
@@ -259,7 +257,6 @@ process impute2 {
 
   validExitStatus 0,1,2
   errorStrategy 'ignore'
-  maxForks 4
 
   input:
   set file('reference'), val(chr), val(start), val(i), file(haps), file(sampleFile) from flattendRefChan
