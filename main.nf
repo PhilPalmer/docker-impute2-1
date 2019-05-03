@@ -263,6 +263,7 @@ process impute2 {
 
   output:
   set val(chr), file("step_7_chr*"), file(sampleFile) into impute2Chan
+  file("*info*") into impute2_info
 
   script:
   end = start + 5_000_000
@@ -273,6 +274,24 @@ process impute2 {
   """
   echo "impute2 -m $genomeFile -h $hapFile -l $legendFile -known_haps_g $haps -int ${start} ${end} -Ne 20000 -o step_7_chr${chr}_${i}"
   impute2 -m $genomeFile -h $hapFile -l $legendFile -known_haps_g $haps -int ${start} ${end} -Ne 20000 -o step_7_chr${chr}_${i}
+  """
+
+}
+
+process info_metrics {
+
+  publishDir "${params.resultdir}/info", mode: 'copy'
+
+  input:
+  file("*") from impute2_info.collect().ifEmpty([])
+
+  output:
+  set file("merged_info"), file("merged_info_val.txt") into merged_info
+
+  script:
+  """
+  ls *_info | xargs -n1 '-I{}' cat {} >> merged_info
+  awk '{print \$7}' merged_info > merged_info_val.txt
   """
 
 }
